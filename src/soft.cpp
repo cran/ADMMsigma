@@ -15,12 +15,12 @@ using namespace Rcpp;
 //' @keywords internal
 //'
 
-double softc(double s, double tau) {
+double softc(const double &s, const double &tau) {
 
   // soft-thresholding
   double d = 0;
   if (s > 0 && s > tau) return(s - tau);
-  if (s < 0 && -s > tau) return(s + tau);
+  else if (s < 0 && -s > tau) return(s + tau);
   else return(d);
 
 }
@@ -36,28 +36,47 @@ double softc(double s, double tau) {
 //'
 //' @param s matrix
 //' @param Tau scalar
-//' @return soft threshold matrix
 //' @keywords internal
 //'
 
-arma::mat softmatrixc(const arma::mat &S, const arma::mat &Tau) {
+void softmatrixc(arma::mat &S, const arma::mat &Tau) {
 
-  // initialize
-  int n = S.n_rows, p = S.n_cols;
-  arma::mat D = arma::ones<arma::mat>(n, p);
+  // loop over all elements
+  for (int i = 0; i < S.n_rows; ++i){
+    for (int j = 0; j < S.n_cols; ++j){
 
-  // soft threshold each element
-  for (int i = 0; i < n; ++i){
-    for (int j = 0; j < p; ++j){
-
-      D(i, j) = softc(S(i, j), Tau(i, j));
+      // soft threshold each element
+      S(i, j) = softc(S(i, j), Tau(i, j));
 
     }
   }
-
-  return(D);
 
 }
 
 
 
+////-----------------------------------------------------
+
+
+
+//' @title Nonzeros (c++)
+//' @description This function counts the number of nonzero elements in a matrix
+//' @param X matrix
+//' @keywords internal
+//'
+
+int numzeros(arma::mat &X) {
+  
+  // loop over all elements of X and count nonzeros
+  int num = 0;
+  arma::mat::iterator it = X.begin();
+  arma::mat::iterator it_end = X.end();
+
+  for (; it != it_end; ++it){
+    if (*it != 0){
+      num++;
+    }
+  }
+
+  return(num);
+}
