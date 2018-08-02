@@ -27,7 +27,7 @@ NULL
 #' @param maxit maximum number of iterations. Defaults to 1e4.
 #' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.
 #' @param K specify the number of folds for cross validation.
-#' @param crit_cv cross validation criterion (\code{loglik}, \code{AIC}, or \code{BIC}). Defaults to \code{loglik}.
+#' @param crit_cv cross validation criterion (\code{loglik} \code{penloglik}, \code{AIC}, or \code{BIC}). Defaults to \code{loglik}.
 #' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 #' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 #' 
@@ -86,7 +86,7 @@ CV_RIDGEc <- function(X, S, lam, path = FALSE, K = 3L, trace = "none") {
 #' @param tol_rel relative convergence tolerance. Defaults to 1e-4.
 #' @param maxit maximum number of iterations. Defaults to 1e4.
 #' @param adjmaxit adjusted maximum number of iterations. During cross validation this option allows the user to adjust the maximum number of iterations after the first \code{lam} tuning parameter has converged (for each \code{alpha}). This option is intended to be paired with \code{warm} starts and allows for "one-step" estimators. Defaults to 1e4.
-#' @param crit_cv cross validation criterion (\code{loglik}, \code{AIC}, or \code{BIC}). Defaults to \code{loglik}.
+#' @param crit_cv cross validation criterion (\code{loglik}, \code{penloglik}, \code{AIC}, or \code{BIC}). Defaults to \code{loglik}.
 #' @param start specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.
 #' @param trace option to display progress of CV. Choose one of \code{progress} to print a progress bar, \code{print} to print completed tuning parameters, or \code{none}.
 #' 
@@ -140,7 +140,7 @@ RIDGEc <- function(S, lam) {
 #'
 #' @param S pxp sample covariance matrix (denominator n).
 #' @param initOmega initialization matrix for Omega
-#' @param initZ2 initialization matrix for Z2
+#' @param initZ initialization matrix for Z
 #' @param initY initialization matrix for Y
 #' @param lam postive tuning parameter for elastic net penalty.
 #' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to alpha = 1.
@@ -177,7 +177,7 @@ RIDGEc <- function(S, lam) {
 #' 
 #' @keywords internal
 #'
-ADMMc <- function(S, initOmega, initZ2, initY, lam, alpha = 1, diagonal = FALSE, rho = 2, mu = 10, tau_inc = 2, tau_dec = 2, crit = "ADMM", tol_abs = 1e-4, tol_rel = 1e-4, maxit = 1e4L) {
-    .Call('_ADMMsigma_ADMMc', PACKAGE = 'ADMMsigma', S, initOmega, initZ2, initY, lam, alpha, diagonal, rho, mu, tau_inc, tau_dec, crit, tol_abs, tol_rel, maxit)
+ADMMc <- function(S, initOmega, initZ, initY, lam, alpha = 1, diagonal = FALSE, rho = 2, mu = 10, tau_inc = 2, tau_dec = 2, crit = "ADMM", tol_abs = 1e-4, tol_rel = 1e-4, maxit = 1e4L) {
+    .Call('_ADMMsigma_ADMMc', PACKAGE = 'ADMMsigma', S, initOmega, initZ, initY, lam, alpha, diagonal, rho, mu, tau_inc, tau_dec, crit, tol_abs, tol_rel, maxit)
 }
 

@@ -8,9 +8,9 @@ ADMMsigma(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
   lam = NULL, alpha = seq(0, 1, 0.2), diagonal = FALSE, path = FALSE,
   rho = 2, mu = 10, tau.inc = 2, tau.dec = 2, crit = c("ADMM",
   "loglik"), tol.abs = 1e-04, tol.rel = 1e-04, maxit = 10000,
-  adjmaxit = NULL, K = 5, crit.cv = c("loglik", "AIC", "BIC"),
-  start = c("warm", "cold"), cores = 1, trace = c("progress", "print",
-  "none"))
+  adjmaxit = NULL, K = 5, crit.cv = c("loglik", "penloglik", "AIC",
+  "BIC"), start = c("warm", "cold"), cores = 1, trace = c("progress",
+  "print", "none"))
 }
 \arguments{
 \item{X}{option to provide a nxp data matrix. Each row corresponds to a single observation and each column contains n observations of a single feature/variable.}
@@ -49,7 +49,7 @@ ADMMsigma(X = NULL, S = NULL, nlam = 10, lam.min.ratio = 0.01,
 
 \item{K}{specify the number of folds for cross validation.}
 
-\item{crit.cv}{cross validation criterion (\code{loglik}, \code{AIC}, or \code{BIC}). Defaults to \code{loglik}.}
+\item{crit.cv}{cross validation criterion (\code{loglik}, \code{penloglik}, \code{AIC}, or \code{BIC}). Defaults to \code{loglik}.}
 
 \item{start}{specify \code{warm} or \code{cold} start for cross validation. Default is \code{warm}.}
 
@@ -98,8 +98,8 @@ reduces to a ridge-type penalty and when \eqn{\alpha = 1} it reduces to a
 lasso-type penalty.
 }
 \details{
-For details on the implementation of 'ADMMsigma', see the vignette
-\url{https://mgallow.github.io/ADMMsigma/}.
+For details on the implementation of 'ADMMsigma', see the website
+\url{https://mgallow.github.io/ADMMsigma/articles/Details.html}.
 }
 \examples{
 # generate data from a sparse matrix
@@ -112,6 +112,7 @@ for (i in 1:5){
  }
 
 # generate 100 x 5 matrix with rows drawn from iid N_p(0, S)
+set.seed(123)
 Z = matrix(rnorm(100*5), nrow = 100, ncol = 5)
 out = eigen(S, symmetric = TRUE)
 S.sqrt = out$vectors \%*\% diag(out$values^0.5)

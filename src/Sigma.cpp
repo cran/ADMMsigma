@@ -53,7 +53,7 @@ arma::mat RIDGEc(const arma::mat &S, double lam){
 //'
 //' @param S pxp sample covariance matrix (denominator n).
 //' @param initOmega initialization matrix for Omega
-//' @param initZ2 initialization matrix for Z2
+//' @param initZ initialization matrix for Z
 //' @param initY initialization matrix for Y
 //' @param lam postive tuning parameter for elastic net penalty.
 //' @param alpha elastic net mixing parameter contained in [0, 1]. \code{0 = ridge, 1 = lasso}. Defaults to alpha = 1.
@@ -91,14 +91,14 @@ arma::mat RIDGEc(const arma::mat &S, double lam){
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-List ADMMc(const arma::mat &S, const arma::mat &initOmega, const arma::mat &initZ2, const arma::mat &initY, const double lam, const double alpha = 1, bool diagonal = false, double rho = 2, const double mu = 10, const double tau_inc = 2, const double tau_dec = 2, std::string crit = "ADMM", const double tol_abs = 1e-4, const double tol_rel = 1e-4, const int maxit = 1e4){
+List ADMMc(const arma::mat &S, const arma::mat &initOmega, const arma::mat &initZ, const arma::mat &initY, const double lam, const double alpha = 1, bool diagonal = false, double rho = 2, const double mu = 10, const double tau_inc = 2, const double tau_dec = 2, std::string crit = "ADMM", const double tol_abs = 1e-4, const double tol_rel = 1e-4, const int maxit = 1e4){
   
   // allocate memory
   bool criterion = true;
   int p = S.n_cols, iter = 0;
   double s, r, eps1, eps2, lik, lik2, sgn, logdet;
   s = r = eps1 = eps2 = lik = lik2 = sgn = logdet = 0;
-  arma::mat Z2(initZ2), Z(initZ2), Y(initY), Omega(initOmega), C(p, p, arma::fill::ones), Tau, Taum;
+  arma::mat Z2(initZ), Z(initZ), Y(initY), Omega(initOmega), C(p, p, arma::fill::ones), Tau, Taum;
 
   
   // option to penalize diagonal elements
@@ -117,15 +117,15 @@ List ADMMc(const arma::mat &S, const arma::mat &initOmega, const arma::mat &init
     iter++;
     Z = Z2;
     
-    // penalty equation (1)
+    // ridge equation (1)
+    // gather eigen values (spectral decomposition)
+    Omega = RIDGEc(S + Y - rho*Z, rho);
+    
+    // penalty equation (2)
     // soft-thresholding
     Z2 = Y + rho*Omega;
     softmatrixc(Z2, Tau);
     Z2 /= (Taum + rho);
-    
-    // ridge equation (2)
-    // gather eigen values (spectral decomposition)
-    Omega = RIDGEc(S + Y - rho*Z2, rho);
     
     // update Y (3)
     Y += rho*(Omega - Z2);
@@ -145,7 +145,7 @@ List ADMMc(const arma::mat &S, const arma::mat &initOmega, const arma::mat &init
       
       // compute penalized loglik (close enough)
       arma::log_det(logdet, sgn, Omega);
-      lik2 = (-p/2)*(arma::accu(Omega % S) - logdet + lam*((1 - alpha)/2*arma::norm(C % Omega, "fro") + alpha*arma::accu(C % arma::abs(Omega))));
+      lik2 = (-p/2)*(arma::accu(Omega % S) - logdet + lam*((1 - alpha)/2*arma::accu(arma::square(C % Omega)) + alpha*arma::accu(C % arma::abs(Omega))));
       criterion = (std::abs((lik2 - lik)/lik) >= tol_abs);
       lik = lik2;
       
@@ -168,7 +168,7 @@ List ADMMc(const arma::mat &S, const arma::mat &initOmega, const arma::mat &init
                       Named("lam") = lam,
                       Named("alpha") = alpha,
                       Named("Omega") = Omega,
-                      Named("Z2") = Z2,
+                      Named("Z") = Z2,
                       Named("Y") = Y,
                       Named("rho") = rho);
   
